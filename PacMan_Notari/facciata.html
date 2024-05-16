@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body style="background-color: black;" id="body">
+    <div style="margin-top:300px; text-align: center;">
+        <img src="animazioni/pacman-right/1.png" width="30px" height="30px">
+        <img src="animazioni/ghosts/blinky.png" width="30px" height="30px">
+        <img src="animazioni/ghosts/pinky.png" width="30px" height="30px">
+        <img src="animazioni/ghosts/inky.png" width="30px" height="30px">
+        <img src="animazioni/ghosts/clyde.png" width="30px" height="30px">
+        <h1 style="font-family: 'Press Start 2P', system-ui; font-weight: 400; font-style: normal; font-size: xx-large; color: yellow;">
+            PAC-MAN
+        </h1>
+        <h2 style="font-family: 'Press Start 2P', system-ui; font-weight: 400; font-style: normal; color: yellow;"> Press [E] to start</h2>
+    </div>
+    </body>
+    <script>
+        let intro_sound = new Audio();
+        intro_sound.src = "audio/pacman_beginning.wav";
+        
+        document.addEventListener("keydown", () => {
+            if(event.key == "e"){
+                intro_sound.play();
+                setTimeout(()=>{
+                    location.href='PacMan.html'; 
+                }, 4500);                   
+            }
+        })
+    </script>
+</html>

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <ul>                   
+        <li> <a href="facciata.html" style="color: yellow; text-decoration: none;  font-family: 'Press Start 2P', system-ui;">HOME</a> </li>
+        <li>
+            <a style="color: yellow; text-decoration: none;  font-family: 'Press Start 2P', system-ui;">POINTS: </a>
+            <a style="color: yellow; text-decoration: none;  font-family: 'Press Start 2P', system-ui;" id="counter"></a>
+            <br>
+            <a style="color: yellow; text-decoration: none;  font-family: 'Press Start 2P', system-ui;">LIFES: </a>
+            <a style="color: yellow; text-decoration: none;  font-family: 'Press Start 2P', system-ui;" id="lifes"></a>
+        </li>
+    </ul>
+    <div class="titolo">
+        <img src="animazioni/pacman-right/1.png" width="30px" height="30px">
+        <img src="animazioni/ghosts/blinky.png" width="30px" height="30px">
+        <img src="animazioni/ghosts/pinky.png" width="30px" height="30px">
+        <img src="animazioni/ghosts/inky.png" width="30px" height="30px">
+        <img src="animazioni/ghosts/clyde.png" width="30px" height="30px">
+        <h1>
+            PAC-MAN
+        </h1>
+    </div>
+    <div>
+        <canvas id="interfaccia" width="600" height="600" style="border: 2px solid blue; margin-left: 25%; margin-right: 25%;">
+        </canvas>
+        <h1 class = "pac-man">
+        </h1>
+    </div>
+</body>
+<style>
+    body{
+        background-color: black;
+    }
+    .titolo{
+        text-align: center;
+        color: yellow;
+        font-family: "Press Start 2P", system-ui;
+        font-weight: 400;
+        font-style: normal;
+    }
+</style>
+<script>
+    var canvas = document.getElementById("interfaccia");
+    var contesto = canvas.getContext("2d");
+    contesto.beginPath();
+    
+    function mappa(){
+
+        function confine_mappa(){
+            contesto.strokeStyle='blue';
+            contesto.lineWidth = 10;
+            contesto.moveTo(5,5);
+            contesto.lineTo(595,5);
+            contesto.lineTo(595,595);
+            contesto.lineTo(5,595);
+            contesto.lineTo(5,0);
+            contesto.stroke();
+            contesto.strokeStyle='blue';
+            contesto.lineWidth = 3;
+            contesto.strokeRect(250,250,100,100);
+            contesto.stroke();
+        }
+        confine_mappa();
+
+        function prompt_mappa(){
+            strokeStyle='blue';
+            contesto.strokeRect(0,310,100,20);
+            contesto.strokeRect(0,250,100,20);
+            contesto.strokeRect(500,310,100,20);
+            contesto.strokeRect(500,250,100,20);
+            contesto.strokeRect(0,100,450,20);
+            contesto.strokeRect(150,500,450,20);
+            contesto.strokeRect(0,400,450,20);
+            contesto.strokeRect(150,180,450,20);
+            contesto.stroke();
+        }
+        prompt_mappa();
+
+    }
+    mappa();
+    var mapBorders = [
+        {x: 0, y: 0, width: 600, height: 10},    
+        {x: 0, y: 590, width: 600, height: 10},  
+        {x: 0, y: 0, width: 10, height: 600},    
+        {x: 590, y: 0, width: 10, height: 600}, 
+        {x: 250, y: 250, width: 100, height: 100},
+        {x: 0, y: 310, width: 100, height: 20}, 
+        {x: 0, y: 250, width: 100, height: 20},
+        {x: 500, y: 310, width: 100, height: 20},
+        {x: 500, y: 250, width: 100, height: 20},
+        {x: 0, y: 100, width: 450, height: 20},
+        {x: 150, y: 500, width: 450, height: 20},
+        {x: 0, y: 400, width: 450, height: 20},
+        {x: 150, y: 180, width: 450, height: 20},
+    ];
+
+    var mapBorders_ghosts = [
+        {x: 0, y: 0, width: 600, height: 10},    
+        {x: 0, y: 590, width: 600, height: 10},  
+        {x: 0, y: 0, width: 10, height: 600},    
+        {x: 590, y: 0, width: 10, height: 600},   
+        {x: 0, y: 310, width: 100, height: 20},
+        {x: 0, y: 250, width: 100, height: 20},
+        {x: 500, y: 310, width: 100, height: 20},
+        {x: 500, y: 250, width: 100, height: 20},
+        {x: 0, y: 100, width: 450, height: 20},
+        {x: 150, y: 500, width: 450, height: 20},
+        {x: 0, y: 400, width: 450, height: 20},
+        {x: 150, y: 180, width: 450, height: 20},
+    ];
+
+    const dotGrid = [];
+    const dotSpacingX = 40;
+    const dotSpacingY = 70;
+    const dotSize = 3; 
+    for (let x = 20; x < 600; x += dotSpacingX) {
+        for (let y = 20; y < 600; y += dotSpacingY) {
+            const isInBorder = mapBorders.some((border) => {
+                return (
+                    x > border.x &&
+                    x < border.x + border.width &&
+                    y > border.y &&
+                    y < border.y + border.height
+                );
+            });
+
+            if (isInBorder == false) {
+                dotGrid.push({ x, y });
+            }
+        }
+    }
+
+    let pacman = new Image();
+    pacman.src = "animazioni/pacman-right/1.png";
+    let pacmanX = 287.5;
+    let pacmanY = 210;
+    pacman.addEventListener('load', () => {
+        contesto.drawImage(pacman, pacmanX, pacmanY, 25, 25)
+    }, false);
+
+    let blinky = new Image();
+    let blinky_src = "animazioni/ghosts/blinky.png";
+    blinky.src = blinky_src;
+    let blinkyX = 287.5;
+    let blinkyY = 275;
+    blinky.addEventListener('load', () => {
+        contesto.drawImage(blinky, blinkyX, blinkyY, 25, 25)
+    }, false);
+
+    let clyde = new Image();
+    let clyde_src = "animazioni/ghosts/clyde.png";
+    clyde.src = clyde_src;
+    let clydeX = 287.5;
+    let clydeY = 305;
+    clyde.addEventListener('load', () => {
+        contesto.drawImage(clyde, clydeX, clydeY, 25, 25)
+    }, false);
+
+    let pinky = new Image();
+    let pinky_src = "animazioni/ghosts/pinky.png";
+    pinky.src = pinky_src;
+    let pinkyX = 255;
+    let pinkyY = 275;
+    pinky.addEventListener('load', () => {
+        contesto.drawImage(pinky, pinkyX, pinkyY, 25, 25)
+    }, false);
+
+    let inky = new Image();
+    let inky_src = "animazioni/ghosts/inky.png";
+    inky.src = inky_src;
+    let inkyX = 320;
+    let inkyY = 275;
+    inky.addEventListener('load',() => {
+        contesto.drawImage(inky, inkyX, inkyY, 25, 25)
+    }, false);
+    
+    let apple = new Image();
+    apple.src = "animazioni/other/apple.png";
+    let appleX = 550;
+    let appleY = 550;
+    let appleW = 25;
+    let appleH = 25
+    pinky.addEventListener('load', () => {
+        contesto.drawImage(apple, appleX, appleY, appleW, appleH)
+    }, false);
+
+    let cherry = new Image();
+    cherry.src = "animazioni/other/strawberry.png";
+    let cherryX = 50;
+    let cherryY = 50;
+    let cherryH = 25;
+    let cherryW = 25;
+    pinky.addEventListener('load', () => {
+        contesto.drawImage(cherry, cherryX, cherryY, cherryW, cherryH)
+    }, false);
+
+    let dot = new Image();
+    dot.addEventListener('load', () =>{
+        contesto.fillStyle = 'white';
+        dotGrid.forEach((dot)  => { 
+            contesto.beginPath();
+            contesto.arc(dot.x, dot.y, dotSize, 0, Math.PI * 2);
+            contesto.fill();
+        })
+    })
+
+    let eating_sound = new Audio();
+    eating_sound.src = "audio/pac-man-waka-waka.mp3";
+
+    let death_sound = new Audio();
+    death_sound.src = "audio/pacman_death.wav";
+
+    let eating_ghost_sound = new Audio();
+    eating_ghost_sound.src = "audio/pacman_eatghost.wav";
+
+    let eating_fruit = new Audio();
+    eating_fruit.src = "audio/pacman_eatfruit.wav";
+
+    let cont = 0;
+    let timer = 0;
+    let vite = 3;
+    let ghost_points = 0;
+
+    document.addEventListener('keydown', function(event){
+        apple.src = "animazioni/other/apple.png";
+        cherry.src = "animazioni/other/strawberry.png";
+        dot.src = "animazioni/other/dot.png";
+        pinky.src = pinky_src;
+        clyde.src = clyde_src;
+        blinky.src = blinky_src;
+        inky.src = inky_src;
+        let speed = 10;
+
+        function isColliding(x, y, width, height) {
+            return mapBorders.some((border) => {
+                return (
+                    x < border.x + border.width &&
+                    x + width > border.x &&
+                    y < border.y + border.height &&
+                    y + height > border.y
+                );
+            });
+        }                                                                                                                                                                                                                              
+
+        function GhostIsColliding(x, y, width, height) {
+            return mapBorders_ghosts.some((border) => {
+                return (
+                    x < border.x + border.width &&
+                    x + width > border.x &&
+                    y < border.y + border.height &&
+                    y + height > border.y
+                );
+            });
+        }
+
+        function pacman_is_eating_inky(){
+            let tollerance = 25;
+            if((Math.abs(pacmanX-inkyX) < tollerance) && (Math.abs(pacmanY-inkyY) < tollerance)){
+                inkyX = 1000;
+                inkyY = 1000;
+                eating_ghost_sound.play();
+                ghost_points += 25;
+                setTimeout( () => {
+                    inkyX = 300;
+                    inkyY = 300;
+                }, 1000);  
+            }
+        }
+
+        function pacman_is_eating_pinky(){
+            let tollerance = 25;
+            if((Math.abs(pacmanX-pinkyX) < tollerance) && (Math.abs(pacmanY-pinkyY) < tollerance)){
+                pinkyX = 1000;
+                pinkyY = 1000;  
+                eating_ghost_sound.play();             
+                ghost_points += 25;
+                setTimeout( () => {
+                    pinkyX = 300;
+                    pinkyY = 300;
+                }, 1000);  
+            }
+        }
+
+        function pacman_is_eating_clyde(){
+            let tollerance = 25;
+            if((Math.abs(pacmanX-clydeX) < tollerance) && (Math.abs(pacmanY-clydeY) < tollerance)){
+                clydeX = 1000;
+                clydeY = 1000;
+                eating_ghost_sound.play();
+                ghost_points += 25;
+                setTimeout( () => {
+                    clydeX = 300;
+                    clydeY = 300;
+                }, 1000);  
+            }
+        }
+
+        function pacman_is_eating_blinky(){
+            let tollerance = 25;
+            if((Math.abs(pacmanX-blinkyX) < tollerance) && (Math.abs(pacmanY-blinkyY) < tollerance)){
+                blinkyX = 1000;
+                blinkyY = 1000;
+                eating_ghost_sound.play();
+                ghost_points += 25;
+                setTimeout( () => {
+                    blinkyX = 300;
+                    blinkyY = 300;
+                }, 1000);  
+            }
+        }
+
+        function ghost_is_eating(x, y){
+            let tollerance = 25;
+            if((Math.abs(pacmanX-x) < tollerance) && (Math.abs(pacmanY-y) < tollerance)){
+                pacmanX = 1000;
+                pacmanY = 1000;
+                death_sound.play();
+                setTimeout( () => {
+                    pacmanX = 287.5;
+                    pacmanY = 210; 
+                }, 1000);
+                vite--;
+                if(vite == 0){
+                    contesto.clearRect(0, 0, canvas.width, canvas.height);
+                    document.body.innerHTML = "<style>body{background-color: black;} .titolo{text-align: center;color: yellow;font-family: 'Press Start 2P', system-ui;font-weight: 400;font-style: normal;}</style><div class='titolo' style='text-align: center; color: yellow; font-family: Press Start 2P, system-ui;font-weight: 400; font-style: normal;'><img src='animazioni/pacman-right/1.png' width='30px' height='30px'><img src='animazioni/ghosts/blinky.png' width='30px' height='30px'><img src='animazioni/ghosts/pinky.png' width='30px' height='30px'><img src='animazioni/ghosts/inky.png' width='30px' height='30px'><img src='animazioni/ghosts/clyde.png' width='30px' height='30px'><h1>PAC-MAN</h1> <br> <h1>GAME OVER</h1> <br> <h1>POINTS: "+cont+"</h1>"
+                }
+            }
+            lifes.textContent = vite;
+        }
+
+        function check_pacman_effect(){
+            if(pacmanX < 25 && (pacmanY<310 && pacmanY > 250)){
+                pacmanX = 1000;
+                pacmanY = 1000;
+                setTimeout( () => {
+                    pacmanX = 530;
+                    pacmanY = 280; 
+                }, 1000);
+            }
+
+            else if(pacmanX >= 555.7 && (pacmanY<310 && pacmanY > 250)){
+                pacmanX = 1000;
+                pacmanY = 1000;
+                setTimeout( () => {
+                    pacmanX = 555.8;
+                    pacmanY = 280; 
+                }, 1);
+                setTimeout( () => {
+                    pacmanX = 70;
+                    pacmanY = 280; 
+                }, 1000);
+            }
+        }         
+        check_pacman_effect();
+
+        function movimento_fantasmi(){
+            let sent;
+            function pinky_movement(){
+                let NewPinkyY = pinkyY;
+                let NewPinkyX = pinkyX;
+                function Pinky(){
+                    sent = Math.floor(Math.random()*5);
+                    if(sent==1){
+                        NewPinkyX += 30;
+                    }
+                    else if(sent==2){
+                        NewPinkyX -= 30;
+                    }
+                    else if(sent==3){
+                        NewPinkyY += 10;
+                    }
+                    else if(sent==4){
+                        NewPinkyY -= 10;
+                    }
+                }
+                Pinky();
+                if(GhostIsColliding(NewPinkyX, NewPinkyY, 25, 25) == true){
+                    Pinky();
+                }
+                else{
+                    pinkyX = NewPinkyX;
+                    pinkyY = NewPinkyY;
+                }
+            }
+
+            function inky_movement(){
+                let NewInkyY = inkyY;
+                let NewInkyX = inkyX;
+                function Inky(){
+                    sent = Math.floor(Math.random()*5);
+                    if(sent==1){
+                        NewInkyX += 30;
+                    }
+                    else if(sent==2){
+                        NewInkyX -= 30;
+                    }
+                    else if(sent==3){
+                        NewInkyY += 10;
+                    }
+                    else if(sent==4){
+                        NewInkyY -= 10;
+                    }
+                }
+                Inky();
+                if(GhostIsColliding(NewInkyX, NewInkyY, 25, 25) == true){
+                    Inky();
+                }
+                else{
+                    inkyX = NewInkyX;
+                    inkyY = NewInkyY;
+                }
+            }
+
+            function blinky_movement(){
+                let NewBlinkyY = blinkyY;
+                let NewBlinkyX = blinkyX;
+                function Blinky(){
+                    sent = Math.floor(Math.random()*5);
+                    if(sent==1){
+                        NewBlinkyX += 30;
+                    }
+                    else if(sent==2){
+                        NewBlinkyX -= 30;
+                    }
+                    else if(sent==3){
+                        NewBlinkyY += 10;
+                    }
+                    else if(sent==4){
+                        NewBlinkyY -= 10;
+                    }
+                }
+                Blinky();
+                if(GhostIsColliding(NewBlinkyX, NewBlinkyY, 25, 25) == true){
+                    Blinky();
+                }
+                else{
+                    blinkyX = NewBlinkyX;
+                    blinkyY = NewBlinkyY;
+                }
+            }
+
+            function clyde_movement(){
+                let NewClydeY = clydeY;
+                let NewClydeX = clydeX;
+                function Clyde(){
+                    sent = Math.floor(Math.random()*5);
+                    if(sent==1){
+                        NewClydeX += 30;
+                    }
+                    else if(sent==2){
+                        NewClydeX -= 30;
+                    }
+                    else if(sent==3){
+                        NewClydeY += 10;
+                    }
+                    else if(sent==4){
+                        NewClydeY -= 10;
+                    }
+                }
+                Clyde();
+                if(GhostIsColliding(NewClydeX, NewClydeY, 25, 25) == true){
+                    Clyde();
+                }
+                else{
+                    clydeX = NewClydeX;
+                    clydeY = NewClydeY;
+                }
+            }
+            pinky_movement();
+            inky_movement();
+            blinky_movement();
+            clyde_movement();
+        }
+
+        function eatDot(x, y, dotArray){
+            const tolerance = 40;    
+            const dotIndex = dotArray.findIndex((dot) => {
+                return (
+                    Math.abs(dot.x - x) < tolerance &&
+                    Math.abs(dot.y - y) < tolerance                    
+                );
+            });
+    
+            if (dotIndex !== -1) {
+                dotArray.splice(dotIndex, 1); 
+                cont+=5;
+                eating_sound.play();
+            }
+
+            else if((Math.abs(appleX - x) < tolerance && Math.abs(appleY - y) < tolerance) && (appleW != 0 && appleH != 0)){
+                appleW = 0;
+                appleH = 0;
+                cont+=10;
+                eating_fruit.play();
+            }
+
+            else if((Math.abs(cherryX - x) < tolerance && Math.abs(cherryY - y) < tolerance) && (cherryW != 0 && cherryH != 0)){
+                cherryW = 0;
+                cherryH = 0;
+                cont+=10;
+                eating_fruit.play();
+            }
+
+            if(cont == 625){
+                contesto.clearRect(0, 0, canvas.width, canvas.height);
+                document.body.innerHTML = "<style>body{background-color: black;} .titolo{text-align: center;color: yellow;font-family: 'Press Start 2P', system-ui;font-weight: 400;font-style: normal;}</style><div class='titolo' style='text-align: center; color: yellow; font-family: Press Start 2P, system-ui;font-weight: 400; font-style: normal;'><img src='animazioni/pacman-right/1.png' width='30px' height='30px'><img src='animazioni/ghosts/blinky.png' width='30px' height='30px'><img src='animazioni/ghosts/pinky.png' width='30px' height='30px'><img src='animazioni/ghosts/inky.png' width='30px' height='30px'><img src='animazioni/ghosts/clyde.png' width='30px' height='30px'><h1>PAC-MAN</h1> <br> <h1>YOU WON</h1>"
+            }
+            counter.textContent = cont+ghost_points;
+        }
+        eatDot(pacmanX,pacmanY,dotGrid);
+
+        if(cherryH == 0 && cherryW == 0){
+            let intervallo = setInterval(function() {
+                timer ++;
+            }, 1000);
+            if(timer < 1500){
+                inky_src = "animazioni/ghosts/blue_ghost.png";
+                pinky_src = "animazioni/ghosts/blue_ghost.png";
+                clyde_src = "animazioni/ghosts/blue_ghost.png";
+                blinky_src = "animazioni/ghosts/blue_ghost.png";  
+            }
+            else{
+                clearInterval(intervallo);
+                inky_src = "animazioni/ghosts/inky.png";
+                pinky_src = "animazioni/ghosts/pinky.png";
+                clyde_src = "animazioni/ghosts/clyde.png";
+                blinky_src = "animazioni/ghosts/blinky.png";
+            }
+        }
+
+        if (inky_src == "animazioni/ghosts/inky.png"){
+            ghost_is_eating(inkyX,inkyY);
+        }
+        else if(inky_src == "animazioni/ghosts/blue_ghost.png") {
+            pacman_is_eating_inky();
+        }
+
+        if(pinky_src == "animazioni/ghosts/pinky.png"){
+            ghost_is_eating(pinkyX,pinkyY);
+        }
+        else if(pinky_src == "animazioni/ghosts/blue_ghost.png") {
+            pacman_is_eating_pinky();
+        }
+
+        if(clyde_src == "animazioni/ghosts/clyde.png"){
+            ghost_is_eating(clydeX,clydeY);
+        }
+        else if(clyde_src == "animazioni/ghosts/blue_ghost.png"){
+            pacman_is_eating_clyde();
+        }
+
+        if(blinky_src == "animazioni/ghosts/blinky.png"){
+            ghost_is_eating(blinkyX, blinkyY);
+        }
+        else if(blinky_src == "animazioni/ghosts/blue_ghost.png") {
+            pacman_is_eating_blinky();
+        }
+
+        switch(event.key) {
+            case 'ArrowUp':
+                pacmanY-= speed;
+                if(isColliding(pacmanX, pacmanY, 25, 25)){
+                    pacmanY += speed;
+                    pacman.src = "animazioni/pacman-up/1.png";
+                }
+                else{
+                    pacman.src = "animazioni/pacman-up/1.png";
+                }
+            break;
+
+            case 'w':
+                pacmanY-= speed;
+                if(isColliding(pacmanX, pacmanY, 25, 25)){
+                    pacmanY += speed;
+                    pacman.src = "animazioni/pacman-up/1.png";
+                }
+                else{
+                    pacman.src = "animazioni/pacman-up/1.png";
+                }
+            break;
+
+            case 'ArrowDown':
+                pacmanY += speed;
+                if(isColliding(pacmanX, pacmanY, 25, 25)){
+                    pacmanY -= speed;
+                    pacman.src = "animazioni/pacman-down/1.png";
+                }
+                else{
+                    pacman.src = "animazioni/pacman-down/1.png";
+                }
+            break;
+
+            case 's':
+                pacmanY += speed;
+                if(isColliding(pacmanX, pacmanY, 25, 25)){
+                    pacmanY -= speed;
+                    pacman.src = "animazioni/pacman-down/1.png";
+                }
+                else{
+                    pacman.src = "animazioni/pacman-down/1.png";
+                }
+            break;
+
+            case 'ArrowLeft':
+                pacmanX -= speed;
+                if(isColliding(pacmanX, pacmanY, 25, 25)){
+                    pacmanX += speed;
+                    pacman.src = "animazioni/pacman-left/1.png";
+                }
+                else{
+                    pacman.src = "animazioni/pacman-left/1.png";
+                }
+            break;
+
+            case 'a':
+                pacmanX -= speed;
+                if(isColliding(pacmanX, pacmanY, 25, 25)){
+                    pacmanX += speed;
+                    pacman.src = "animazioni/pacman-left/1.png";
+                }
+                else{
+                    pacman.src = "animazioni/pacman-left/1.png";
+                }
+            break;
+
+            case 'ArrowRight':
+                pacmanX += speed;
+                if(isColliding(pacmanX, pacmanY, 25, 25)){
+                    pacmanX -= speed;
+                    pacman.src = "animazioni/pacman-right/1.png";
+                }
+                else{
+                    pacman.src = "animazioni/pacman-right/1.png";
+                }
+            break;
+
+            case 'd':
+                pacmanX += speed;
+                if(isColliding(pacmanX, pacmanY, 25, 25)){
+                    pacmanX -= speed;
+                    pacman.src = "animazioni/pacman-right/1.png";
+                }
+                else{
+                    pacman.src = "animazioni/pacman-right/1.png";
+                }
+            break;
+
+        }
+
+        contesto.clearRect(0, 0, canvas.width, canvas.height);
+        mappa();
+        movimento_fantasmi();
+        contesto.drawImage(pacman, pacmanX, pacmanY, 25, 25);
+        contesto.drawImage(blinky, blinkyX, blinkyY, 25, 25);
+        contesto.drawImage(inky, inkyX, inkyY, 25, 25);
+        contesto.drawImage(clyde, clydeX, clydeY, 25, 25);
+        contesto.drawImage(pinky, pinkyX, pinkyY, 25, 25);
+    });
+
+</script>
+</html>
